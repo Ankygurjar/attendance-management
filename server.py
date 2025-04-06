@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from admin.admin_services import login_admin_service, add_teacher_service
 from teacher.teacher_services import login_teacher_service, add_student_service
 from student.student_services import login_student_service, get_all_students
+from face_recognition_users.face_recognition_service import match_faces
 
 app:str = Flask(__name__)
 app.secret_key = 'e2B345CV23'
@@ -33,16 +34,18 @@ def login_admin():
 #-------- TEACHER ROUTES -----------
 @app.route('/login_teacher', methods=['GET', 'POST'])
 def login_teacher():
-    if request.method == "POST":
+    if request.method == "POST" and (request.form["email"] != '' and request.form["password"] != ''):
         teacher_data = login_teacher_service(request.form["email"], request.form["password"])
         if(teacher_data.count != 0):
-            session['teacher_email'] = teacher_data[0]['email']
-            session['id'] = teacher_data[0]['id']
-            session['image_path'] = teacher_data[0]['image_path']
-            session['phone_number'] = teacher_data[0]['phone_number']
-            session['subject'] = teacher_data[0]['subject']
-            session['name'] = teacher_data[0]['name']
-            return redirect(url_for('teacher_dashboard'))
+            result = match_faces(teacher_data[0]['image_path'], 'teacher')
+            if(result):
+                session['teacher_email'] = teacher_data[0]['email']
+                session['id'] = teacher_data[0]['id']
+                session['image_path'] = teacher_data[0]['image_path']
+                session['phone_number'] = teacher_data[0]['phone_number']
+                session['subject'] = teacher_data[0]['subject']
+                session['name'] = teacher_data[0]['name']
+                return redirect(url_for('teacher_dashboard'))
     
     return render_template('teacher/login.html')
 
@@ -79,17 +82,19 @@ def add_student():
 
 @app.route('/login_student', methods=['GET', 'POST'])
 def login_student():
-    if request.method == "POST":
+    if request.method == "POST" and (request.form["email"] != '' and request.form["password"] != ''):
         student_data = login_student_service(request.form["email"], request.form["password"])
         if(student_data.count != 0):
-            session['student_email'] = student_data[0]['email']
-            session['id'] = student_data[0]['id']
-            session['image_path'] = student_data[0]['image_path']
-            session['phone_number'] = student_data[0]['phone_number']
-            session['classname'] = student_data[0]['classname']
-            session['name'] = student_data[0]['name']
-            session['roll_number'] = student_data[0]['roll_number']
-            return redirect(url_for('student_dashboard'))
+            result = match_faces(student_data[0]['image_path'], 'student')
+            if(result):
+                session['student_email'] = student_data[0]['email']
+                session['id'] = student_data[0]['id']
+                session['image_path'] = student_data[0]['image_path']
+                session['phone_number'] = student_data[0]['phone_number']
+                session['classname'] = student_data[0]['classname']
+                session['name'] = student_data[0]['name']
+                session['roll_number'] = student_data[0]['roll_number']
+                return redirect(url_for('student_dashboard'))
     
     return render_template('student/login.html')
 
