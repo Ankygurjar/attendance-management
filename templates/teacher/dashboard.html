@@ -1,0 +1,60 @@
+<h2>Teacher Dashboard</h2>
+
+<a href="/">Home</a> <br>
+<div>
+    <p>Welcome: {{teacher_data['name']}}</p>
+    <p>Email: {{teacher_data['teacher_email']}}</p>
+    <p>Subject: {{teacher_data['subject']}}</p>
+    <p>{{teacher_data['image_path']}}</p>
+    <img src="static/teacher_photos/{{teacher_data['image_path']}}" alt="Your Profile Photo" width="150"
+        style="border-radius: 50%;">
+</div>
+<a href="/logout">Logout</a> <br>
+
+<a href="/add_student">Add Student</a>
+
+<h3>Student List</h3>
+<table id="students-table" border="1" cellpadding="8" style="border-collapse: collapse; margin-top: 20px;">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Class</th>
+            <th>Roll Number</th>
+        </tr>
+    </thead>
+    <tbody id="students-table-body">
+        <!-- Students will be inserted here by JavaScript -->
+    </tbody>
+</table>
+
+<script>
+    async function fetchAllStudents() {
+        const response = await fetch('/api/students');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const students = await response.json();
+        populateStudentTable(students);
+    }
+
+    function populateStudentTable(students) {
+        const tableBody = document.getElementById('students-table-body');
+
+        if (students.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4">No students found</td></tr>';
+            return;
+        }
+
+        tableBody.innerHTML = students.map(student => `
+            <tr>
+                <td>${student.name}</td>
+                <td>${student.email}</td>
+                <td>${student.classname}</td>
+                <td>${student.roll_number}</td>
+            </tr>
+        `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchAllStudents);
+</script>

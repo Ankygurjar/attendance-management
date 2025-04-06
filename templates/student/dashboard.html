@@ -1,0 +1,14 @@
+<h2>Student Dashboard</h2>
+
+<a href="/">Home</a> <br>
+<div>
+    <p>Welcome: {{student_data['name']}}</p>
+    <p>Email: {{student_data['teacher_email']}}</p>
+    <p>Subject: {{student_data['subject']}}</p>
+    <p>{{student_data['image_path']}}</p>
+    <p>Classname: {{student_data['classname']}}</p>
+    <p>Roll Number: {{student_data['roll_number']}}</p>
+    <img src="static/student_photos/{{student_data['image_path']}}" alt="Your Profile Photo" width="150"
+        style="border-radius: 50%;">
+</div>
+<a href="/logout">Logout</a> <br>
