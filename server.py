@@ -1,12 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import json
+import requests
+from datetime import timedelta
 
 from admin.admin_services import login_admin_service, add_teacher_service
-from teacher.teacher_services import login_teacher_service, add_student_service
+from teacher.teacher_services import login_teacher_service, add_student_service, analyze_teacher_command
 from student.student_services import login_student_service, get_all_students
 from face_recognition_users.face_recognition_service import match_faces
 
 app:str = Flask(__name__)
 app.secret_key = 'e2B345CV23'
+app.permanent_session_lifetime = timedelta(hours=1)  # Session lasts 1 hour
+
 
 @app.route('/')
 def home():
@@ -69,7 +74,47 @@ def add_teacher():
     
     return render_template('admin/add_teacher.html')
 
-#-----STUDENT ROUTES------#
+@app.route('/add_student_sentiment', methods=['GET', "POST"])
+def student_sentiment():
+    if request.method == 'POST':
+        feedback = request.form['feedback']
+        marks =request.form['marks']
+        attendance = request.form['attendance']
+
+        
+        return render_template("teacher/student_sentiment.html")
+    return render_template("teacher/student_sentiment.html")
+    
+@app.route('/chatbot', methods=['GET'])
+def chatbot():
+    if(session.get('teacher_email') or session.get('admin_email')):
+        return render_template('chatbot.html')
+    
+    return redirect(url_for('logout'))
+
+@app.route('/api/chatbot', methods=['POST'])
+def chatbot_api():
+    if not session.get('teacher_email'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    ai_response = analyze_teacher_command(
+        message=data['message'],
+        teacher_id=session.get('id')
+    )
+    
+    student_data = session.get('chat_context', {}).get('student_data', {})
+    
+    if ai_response.get('action') == 'add_student':
+        if all(k in student_data for k in ['name', 'email', 'roll_number']):
+            return jsonify({
+                'response': f"Ready to add {student_data['name']}. Confirm?",
+                'needs_confirmation': True,
+                'student_data': student_data
+            })
+    
+    return jsonify(ai_response)
+
 @app.route('/add_student', methods=['GET', 'POST'])
 def add_student():
     if request.method == "POST":
@@ -124,6 +169,14 @@ def get_students():
         'classname': student['classname'],
         'roll_number': student['roll_number']
         } for student in students])
+
+def check_ollama_running():
+    try:
+        response = requests.get("http://localhost:11434")
+        print(response.status_code)
+        return True
+    except:
+        return False
 
 if __name__ == '__main__':
     app.run(debug=True)

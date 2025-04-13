@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Student Sentiment Prediction</title>
+</head>
+
+<body>
+    <h2>Enter Student Data</h2>
+    <form method="POST" action="/predict">
+        <label for="feedback">Teacher Feedback:</label><br>
+        <textarea name="feedback" rows="4" cols="50" required></textarea><br><br>
+
+        <label for="marks">Marks:</label><br>
+        <input type="number" name="marks" step="any" required><br><br>
+
+        <label for="attendance">Attendance Percentage:</label><br>
+        <input type="number" name="attendance" step="any" required><br><br>
+
+        <input type="submit" value="Predict Sentiment">
+    </form>
+</body>

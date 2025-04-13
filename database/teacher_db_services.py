@@ -41,16 +41,16 @@ def get_all_teachers_db():
         if con:
             con.close()
 
-def add_student_db(name, password, email, phone, roll_number, classname, photo):
+def add_student_db(name, password, email, phone, roll_number, classname):
     con = connect()
     cursor = con.cursor()
 
     try:
-        print(name, password, email, phone, roll_number, classname, photo)
+        print(name, password, email, phone, roll_number, classname)
         cursor.execute(
             "INSERT INTO students(name, password, email, phone_number, roll_number, classname, image_path) "
-            "VALUES(%s, %s, %s, %s, %s, %s, %s)", 
-            (name, password, email, phone, roll_number, classname, photo)
+            "VALUES(%s, %s, %s, %s, %s, %s, 'no_photo_exception')", 
+            (name, password, email, phone, roll_number, classname)
         )
         con.commit()
         return True
